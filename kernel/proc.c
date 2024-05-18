@@ -131,6 +131,13 @@ found:
     release(&p->lock);
     return 0;
   }
+  if((p->usys=(struct usyscall*)kalloc())==0){
+
+    freeproc(p);
+    release(&p->lock);
+    return 0;
+  }
+  p->usys->pid=p->pid;
 
   // An empty user page table.
   p->pagetable = proc_pagetable(p);
@@ -158,6 +165,9 @@ freeproc(struct proc *p)
   if(p->trapframe)
     kfree((void*)p->trapframe);
   p->trapframe = 0;
+  if(p->usys){
+    kfree((void*)p->usys);
+  }
   if(p->pagetable)
     proc_freepagetable(p->pagetable, p->sz);
   p->pagetable = 0;
@@ -176,7 +186,7 @@ freeproc(struct proc *p)
 pagetable_t
 proc_pagetable(struct proc *p)
 {
-  pagetable_t pagetable;
+  pagetable_t pagetable;//一级页表的地址
 
   // An empty page table.
   pagetable = uvmcreate();
@@ -189,6 +199,7 @@ proc_pagetable(struct proc *p)
   // to/from user space, so not PTE_U.
   if(mappages(pagetable, TRAMPOLINE, PGSIZE,
               (uint64)trampoline, PTE_R | PTE_X) < 0){
+                printf("test ponit 1\n");
     uvmfree(pagetable, 0);
     return 0;
   }
@@ -197,10 +208,18 @@ proc_pagetable(struct proc *p)
   // trampoline.S.
   if(mappages(pagetable, TRAPFRAME, PGSIZE,
               (uint64)(p->trapframe), PTE_R | PTE_W) < 0){
+                printf("test ponit 2\n");
     uvmunmap(pagetable, TRAMPOLINE, 1, 0);
     uvmfree(pagetable, 0);
     return 0;
   }
+(uint64)(p->usys)
+  if(mappages(pagetable,USYSCALL,PGSIZE,&p->pid,PTE_R|PTE_U)<0){
+      printf("test ponit 3\n");
+     uvmfree(pagetable, 0);
+      return 0;
+  }
+
 
   return pagetable;
 }
@@ -212,6 +231,7 @@ proc_freepagetable(pagetable_t pagetable, uint64 sz)
 {
   uvmunmap(pagetable, TRAMPOLINE, 1, 0);
   uvmunmap(pagetable, TRAPFRAME, 1, 0);
+  uvmunmap(pagetable, USYSCALL,1,0);
   uvmfree(pagetable, sz);
 }
 

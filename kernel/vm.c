@@ -204,7 +204,7 @@ pagetable_t
 uvmcreate()
 {
   pagetable_t pagetable;
-  pagetable = (pagetable_t) kalloc();
+  pagetable = (pagetable_t) kalloc();//从物理内存中选择一块free的PGTBL
   if(pagetable == 0)
     return 0;
   memset(pagetable, 0, PGSIZE);
@@ -291,6 +291,12 @@ freewalk(pagetable_t pagetable)
     }
   }
   kfree((void*)pagetable);
+}
+
+void vmprint(pagetable_t pgtbl){
+  for(int i=0;i<1<<9;i++){
+    
+  }
 }
 
 // Free user memory pages,
