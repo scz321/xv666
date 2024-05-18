@@ -1,4 +1,7 @@
 struct stat;
+struct sysinfo;//需要先声明一下
+
+
 
 // system calls
 int fork(void);
@@ -22,6 +25,10 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
+
+//add
+int trace(int);
+int sysinfo(struct sysinfo*);
 
 // ulib.c
 int stat(const char*, struct stat*);
