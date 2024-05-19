@@ -69,12 +69,39 @@ sys_sleep(void)
   return 0;
 }
 
-
+//pgtbltest
 #ifdef LAB_PGTBL
 int
 sys_pgaccess(void)
 {
   // lab pgtbl: your code here.
+  uint64 va=0;
+  argaddr(0,&va);
+ //printf("va:%p\n",va);
+  int len=-1;
+  argint(1,&len);
+  uint64 maskadd=0;
+  argaddr(2,&maskadd);
+
+  struct proc* p=myproc();
+   vmprint(p->pagetable,1);
+
+  uint32 kmask=0;
+  for(int i=0;i<32;i++){
+    pte_t* pte=walk(p->pagetable,(uint64)(va+i*PGSIZE),0);
+
+    if(PTE_A&*pte){
+     // printf("i:%d\n",i);
+      //printf("va:%p\n",(va+i*PGSIZE));
+      kmask=kmask|(1<<i);
+      *pte=*pte&(~PTE_A);
+    }
+    
+  }
+  //printf("kmask:%x\n",kmask);
+
+  copyout(p->pagetable,maskadd,(char*)&kmask,sizeof(kmask));
+
   return 0;
 }
 #endif
@@ -100,3 +127,5 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+//

@@ -213,8 +213,8 @@ proc_pagetable(struct proc *p)
     uvmfree(pagetable, 0);
     return 0;
   }
-(uint64)(p->usys)
-  if(mappages(pagetable,USYSCALL,PGSIZE,&p->pid,PTE_R|PTE_U)<0){
+
+  if(mappages(pagetable,USYSCALL,PGSIZE,(uint64)(p->usys),PTE_R|PTE_U)<0){
       printf("test ponit 3\n");
      uvmfree(pagetable, 0);
       return 0;

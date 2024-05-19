@@ -293,9 +293,30 @@ freewalk(pagetable_t pagetable)
   kfree((void*)pagetable);
 }
 
-void vmprint(pagetable_t pgtbl){
+void vmprint(pagetable_t pgtbl,int depth){
+  if(depth==4){
+    return;
+  }
+  if(depth==1){
+    printf("page table %p\n",pgtbl);
+  }
+  
+  
   for(int i=0;i<1<<9;i++){
-    
+    pte_t pte=pgtbl[i];
+   // uint64 child = PTE2PA(pte);
+
+    if((pte&PTE_V))//目前是认为只需要PTE_V为1即可
+    {
+       uint64 child=PTE2PA(pte);
+       for (int i = 0; i < depth; i++)
+       {
+         printf(" ..");
+       }
+      printf("%d: pte %p pa %p\n",i,pte,child);
+      vmprint((pagetable_t)child,depth+1);
+     
+    }
   }
 }
 
