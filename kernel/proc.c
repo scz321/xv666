@@ -125,12 +125,19 @@ found:
   p->pid = allocpid();
   p->state = USED;
 
+  //add for lab4
+  p->alarm_intervals=0;//初始化为0，后续被sigalarm系统调用修改
+  p->passed_intervals=0;//初始化为0，每次cpu tick之后+1
+  p->handler=0;
+  p->in_handler=0;
+
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
     freeproc(p);
     release(&p->lock);
     return 0;
   }
+
 
   // An empty user page table.
   p->pagetable = proc_pagetable(p);
@@ -298,6 +305,45 @@ fork(void)
 
   // copy saved user registers.
   *(np->trapframe) = *(p->trapframe);
+
+  np->alarm_intervals=p->alarm_intervals;
+  np->passed_intervals=p->passed_intervals;
+  //这里应该直接用uint64存储函数指针就行了）
+  np->handler=p->handler;
+
+  np->in_handler=p->in_handler;             
+  np->saved_epc=p->saved_epc;
+  np->saved_ra=p->saved_ra;
+  np->saved_sp=p->saved_sp;
+  np->saved_gp=p->saved_gp;
+  np->saved_tp=p->saved_tp;
+  np->saved_t0=p->saved_t0;
+  np->saved_t1=p->saved_t1; 
+  np->saved_t2=p->saved_t2;
+  np->saved_s0=p->saved_s0;
+  np->saved_s1=p->saved_s1;
+  np->saved_s2=p->saved_s2;
+  np->saved_s3=p->saved_s3;
+  np->saved_s4=p->saved_s4;
+  np->saved_s5=p->saved_s5;
+  np->saved_s6=p->saved_s6;
+  np->saved_s7=p->saved_s7;
+  np->saved_s8=p->saved_s8;
+  np->saved_s9=p->saved_s9;
+  np->saved_s10=p->saved_s10;
+  np->saved_s11=p->saved_s11;
+  np->saved_a0=p->saved_a0;
+  np->saved_a1=p->saved_a1;
+  np->saved_a2=p->saved_a2;
+  np->saved_a3=p->saved_a3;
+  np->saved_a4=p->saved_a4;
+  np->saved_a5=p->saved_a5;
+  np->saved_a6=p->saved_a6;
+  np->saved_a7=p->saved_a7;
+  np->saved_t3=p->saved_t3;
+  np->saved_t4=p->saved_t4;
+  np->saved_t5=p->saved_t5;
+  np->saved_t6=p->saved_t6;
 
   // Cause fork to return 0 in the child.
   np->trapframe->a0 = 0;

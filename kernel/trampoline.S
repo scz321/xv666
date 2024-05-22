@@ -46,6 +46,7 @@ uservec:
         sd t2, 88(a0)
         sd s0, 96(a0)
         sd s1, 104(a0)
+        #你会发现这里缺少了a0寄存器的保存，是因为a0寄存器在这里被临时用于保存TRAPFRAME的值了
         sd a1, 120(a0)
         sd a2, 128(a0)
         sd a3, 136(a0)
@@ -71,6 +72,7 @@ uservec:
 	# save the user a0 in p->trapframe->a0
         csrr t0, sscratch
         sd t0, 112(a0)
+        #这里表面上看是存储了a0寄存器到指定的内存位置，但是特殊之处在于，这里的a0寄存器其实是指向trapframe的指针，所以它又有了上下文保存的功能
 
         # initialize kernel stack pointer, from p->trapframe->kernel_sp
         ld sp, 8(a0)
