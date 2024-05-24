@@ -122,7 +122,7 @@ consoleread(int user_dst, uint64 dst, int n)
     }
   }
   release(&cons.lock);
-
+  
   return target - n;
 }
 
